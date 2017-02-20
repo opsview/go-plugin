@@ -162,6 +162,11 @@ func (p *Plugin) AddMessage(format string, args ...interface{}) {
 	p.messages = append(p.messages, msg)
 }
 
+func (p *Plugin) AddResult(code Status, format string, args ...interface{}) {
+	p.UpdateStatus(code)
+	p.AddMessage(format, args...)
+}
+
 func (p *Plugin) Final() {
 	fmt.Printf("%s: ", p.status.String())
 	fmt.Printf(strings.Join(p.messages, p.MessageSeparator))
