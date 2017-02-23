@@ -6,8 +6,8 @@ import (
 
 func TestExitCode(t *testing.T) {
 	tests := []struct {
-		in  Status
-		out int
+		in   Status
+		code int
 	}{
 		{OK, 0},
 		{WARNING, 1},
@@ -16,17 +16,17 @@ func TestExitCode(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		code := test.in.ExitCode()
-		if test.out != code {
-			t.Errorf("Expected %s got %s", test.out, code)
+		out := test.in.ExitCode()
+		if test.code != out {
+			t.Errorf("Got %s, expected %s", out, test.code)
 		}
 	}
 }
 
 func TestString(t *testing.T) {
 	tests := []struct {
-		in  Status
-		out string
+		in   Status
+		text string
 	}{
 		{OK, "OK"},
 		{WARNING, "WARNING"},
@@ -35,9 +35,9 @@ func TestString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		text := test.in.String()
-		if test.out != text {
-			t.Errorf("Expected %s got %s", test.out, text)
+		out := test.in.String()
+		if test.text != out {
+			t.Errorf("Got %s, expected %s", out, test.text)
 		}
 	}
 }

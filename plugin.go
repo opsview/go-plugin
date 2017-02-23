@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"io"
 	"os"
 	"sort"
 	"strconv"
@@ -24,12 +25,17 @@ type Plugin struct {
 
 type checkMetric struct {
 	value    interface{}
+	status   Status
 	uom      string
 	warn     string
 	critical string
 }
 
 type checkMetrics map[string]*checkMetric
+
+var OS_EXIT func(Status) = func(code Status) { os.Exit(code.ExitCode()) }
+var OUTPUT_HANDLE io.Writer = os.Stdout
+var ARGS []string = os.Args[1:]
 
 func New(name, version string) *Plugin {
 	return &Plugin{
@@ -45,21 +51,24 @@ func New(name, version string) *Plugin {
 
 func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error {
 	args_count := len(args)
-	_, ok := p.metrics[name]
-	if !ok {
-		p.metrics[name] = &checkMetric{}
-	} else {
-		return fmt.Errorf("Duplicated metric %s;", name)
+
+	metric := &checkMetric{}
+
+	if strings.ContainsRune(name, ' ') && !strings.HasPrefix(name, "'") {
+		name = "'" + name + "'"
+	}
+	if _, ok := p.metrics[name]; ok {
+		return fmt.Errorf("Duplicated metric %s", name)
 	}
 
-	p.metrics[name].value = value
+	metric.value = value
 	if args_count >= 1 {
-		p.metrics[name].uom = args[0]
+		metric.uom = args[0]
 	}
 
 	val, err := i2f(value)
 	if err != nil {
-		return fmt.Errorf("Invalid value of %s: %v;", name, value)
+		return fmt.Errorf("Invalid value of %s: %v", name, value)
 	}
 
 	var alert_message string
@@ -84,10 +93,10 @@ func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error
 			switch i {
 			case 0:
 				threshold_name = "warning"
-				p.metrics[name].warn = a
+				metric.warn = a
 			case 1:
 				threshold_name = "critical"
-				p.metrics[name].critical = a
+				metric.critical = a
 			}
 
 			switch len(thresh) {
@@ -135,25 +144,27 @@ func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error
 			}
 
 			if threshold_breached {
-				p.UpdateStatus(Status(i + 1)) // i=0 warning, i=1 critical
+				metric.status = Status(i + 1) // i=0 warning, i=1 critical
 				if invert {
-					alert_message = fmt.Sprintf("%s is %v (inside %s)", name, value, a)
+					alert_message = fmt.Sprintf("%s is %v%s (inside %s)", name, value, metric.uom, a)
 				} else {
-					alert_message = fmt.Sprintf("%s is %v (outside %s)", name, value, a)
+					alert_message = fmt.Sprintf("%s is %v%s (outside %s)", name, value, metric.uom, a)
 				}
 			}
 
 		}
-	} else {
+	} else if args_count > 3 {
 		return fmt.Errorf("Too many arguments")
 	}
 
 	if len(alert_message) > 0 {
 		p.AddMessage(alert_message)
 	} else if p.AllMetricsInOutput {
-		p.AddMessage(fmt.Sprintf("%s is %v", name, value))
+		p.AddMessage(fmt.Sprintf("%s is %v%s", name, value, metric.uom))
 	}
 
+	p.metrics[name] = metric
+	p.UpdateStatus(metric.status)
 	return nil
 }
 
@@ -168,19 +179,22 @@ func (p *Plugin) AddResult(code Status, format string, args ...interface{}) {
 }
 
 func (p *Plugin) Final() {
-	fmt.Printf("%s: ", p.status.String())
-	fmt.Printf(strings.Join(p.messages, p.MessageSeparator))
+	fmt.Fprintf(OUTPUT_HANDLE, "%s:", p.status.String())
+	if len(p.messages) > 0 {
+		fmt.Fprintf(OUTPUT_HANDLE, " ")
+		fmt.Fprintf(OUTPUT_HANDLE, strings.Join(p.messages, p.MessageSeparator))
+	}
 	if len(p.metrics) > 0 {
 		var sorted []string
 		sorted = make([]string, 0, len(p.metrics))
 
-		fmt.Printf(" |")
+		fmt.Fprintf(OUTPUT_HANDLE, " |")
 		for k := range p.metrics {
 			sorted = append(sorted, k)
 		}
 		sort.Strings(sorted)
 		for _, k := range sorted {
-			fmt.Printf(" %s=%v%s;%s;%s;;",
+			fmt.Fprintf(OUTPUT_HANDLE, " %s=%v%s;%s;%s;;",
 				k,
 				p.metrics[k].value,
 				p.metrics[k].uom,
@@ -189,8 +203,8 @@ func (p *Plugin) Final() {
 			)
 		}
 	}
-	fmt.Printf("\n")
-	os.Exit(p.status.ExitCode())
+	fmt.Fprintf(OUTPUT_HANDLE, "\n")
+	OS_EXIT(p.status)
 }
 
 func (p *Plugin) SetMessage(format string, args ...interface{}) {
@@ -235,34 +249,30 @@ func (p *Plugin) ParseArgs(opts interface{}) error {
 		g.ShortDescription = "Plugin Options"
 	}
 
-	_, err = parser.Parse()
+	_, err = parser.ParseArgs(ARGS)
 
 	if builtin.Help {
-		fmt.Printf("%s v%s\n", p.name, strings.TrimPrefix(p.Version, "v"))
+		fmt.Fprintf(OUTPUT_HANDLE, "%s v%s\n", p.name, strings.TrimPrefix(p.Version, "v"))
 		if len(p.Preamble) > 0 {
-			fmt.Println(p.Preamble)
+			fmt.Fprintln(OUTPUT_HANDLE, p.Preamble)
 		}
 		parser.Options = flags.HelpFlag
 		var b bytes.Buffer
 		parser.WriteHelp(&b)
-		fmt.Println(b.String())
+		fmt.Fprintln(OUTPUT_HANDLE, b.String())
 
 		if len(p.Description) > 0 {
-			fmt.Println(p.Description)
+			fmt.Fprintln(OUTPUT_HANDLE, p.Description)
 		}
-		os.Exit(0)
+		OS_EXIT(UNKNOWN)
 	}
 
 	return err
 }
 
 func (p *Plugin) UpdateStatus(status Status) {
-	if status >= 0 && status <= 3 {
-		if int(status) > int(p.status) {
-			p.status = status
-		}
-	} else {
-		panic("Invalid status code")
+	if int(status) > int(p.status) {
+		p.status = status
 	}
 }
 
