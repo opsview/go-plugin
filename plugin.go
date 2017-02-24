@@ -33,9 +33,9 @@ type checkMetric struct {
 
 type checkMetrics map[string]*checkMetric
 
-var OS_EXIT func(Status) = func(code Status) { os.Exit(code.ExitCode()) }
-var OUTPUT_HANDLE io.Writer = os.Stdout
-var ARGS []string = os.Args[1:]
+var pOsExit = func(code Status) { os.Exit(code.ExitCode()) }
+var pOutputHandle io.Writer = os.Stdout
+var pArgs = os.Args[1:]
 
 func New(name, version string) *Plugin {
 	return &Plugin{
@@ -50,7 +50,7 @@ func New(name, version string) *Plugin {
 }
 
 func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error {
-	args_count := len(args)
+	argsCount := len(args)
 
 	metric := &checkMetric{}
 
@@ -62,7 +62,7 @@ func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error
 	}
 
 	metric.value = value
-	if args_count >= 1 {
+	if argsCount >= 1 {
 		metric.uom = args[0]
 	}
 
@@ -71,12 +71,12 @@ func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error
 		return fmt.Errorf("Invalid value of %s: %v", name, value)
 	}
 
-	var alert_message string
+	var alertMessage string
 
-	if args_count == 2 || args_count == 3 {
-		var threshold_breached bool
+	if argsCount == 2 || argsCount == 3 {
+		var thresholdBreached bool
 		for i, a := range args[1:] {
-			var threshold_name string
+			var thresholdName string
 			var invert bool
 
 			if len(a) == 0 {
@@ -92,73 +92,73 @@ func (p *Plugin) AddMetric(name string, value interface{}, args ...string) error
 
 			switch i {
 			case 0:
-				threshold_name = "warning"
+				thresholdName = "warning"
 				metric.warn = a
 			case 1:
-				threshold_name = "critical"
+				thresholdName = "critical"
 				metric.critical = a
 			}
 
 			switch len(thresh) {
 			case 1:
 				// v < X
-				t_max, err := strconv.ParseFloat(thresh[0], 64)
+				tMax, err := strconv.ParseFloat(thresh[0], 64)
 				if err != nil {
-					return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+					return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 				}
-				threshold_breached = val < 0 || val > t_max
+				thresholdBreached = val < 0 || val > tMax
 			case 2:
 				switch {
 				case thresh[0] == "~":
-					t_max, err := strconv.ParseFloat(thresh[1], 64)
+					tMax, err := strconv.ParseFloat(thresh[1], 64)
 					if err != nil {
-						return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+						return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 					}
-					threshold_breached = val > t_max
+					thresholdBreached = val > tMax
 				case thresh[1] == "":
-					t_min, err := strconv.ParseFloat(thresh[0], 64)
+					tMin, err := strconv.ParseFloat(thresh[0], 64)
 					if err != nil {
-						return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+						return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 					}
-					threshold_breached = val < t_min
+					thresholdBreached = val < tMin
 				default:
-					t_min, err := strconv.ParseFloat(thresh[0], 64)
+					tMin, err := strconv.ParseFloat(thresh[0], 64)
 					if err != nil {
-						return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+						return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 					}
-					t_max, err := strconv.ParseFloat(thresh[1], 64)
+					tMax, err := strconv.ParseFloat(thresh[1], 64)
 					if err != nil {
-						return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+						return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 					}
-					if t_min > t_max {
-						return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+					if tMin > tMax {
+						return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 					}
-					threshold_breached = val < t_min || val > t_max
+					thresholdBreached = val < tMin || val > tMax
 				}
 			default:
-				return fmt.Errorf("Invalid format of %s threshold %s: %s", threshold_name, name, a)
+				return fmt.Errorf("Invalid format of %s threshold %s: %s", thresholdName, name, a)
 			}
 
 			if invert {
-				threshold_breached = !threshold_breached
+				thresholdBreached = !thresholdBreached
 			}
 
-			if threshold_breached {
+			if thresholdBreached {
 				metric.status = Status(i + 1) // i=0 warning, i=1 critical
 				if invert {
-					alert_message = fmt.Sprintf("%s is %v%s (inside %s)", name, value, metric.uom, a)
+					alertMessage = fmt.Sprintf("%s is %v%s (inside %s)", name, value, metric.uom, a)
 				} else {
-					alert_message = fmt.Sprintf("%s is %v%s (outside %s)", name, value, metric.uom, a)
+					alertMessage = fmt.Sprintf("%s is %v%s (outside %s)", name, value, metric.uom, a)
 				}
 			}
 
 		}
-	} else if args_count > 3 {
+	} else if argsCount > 3 {
 		return fmt.Errorf("Too many arguments")
 	}
 
-	if len(alert_message) > 0 {
-		p.AddMessage(alert_message)
+	if len(alertMessage) > 0 {
+		p.AddMessage(alertMessage)
 	} else if p.AllMetricsInOutput {
 		p.AddMessage(fmt.Sprintf("%s is %v%s", name, value, metric.uom))
 	}
@@ -179,22 +179,22 @@ func (p *Plugin) AddResult(code Status, format string, args ...interface{}) {
 }
 
 func (p *Plugin) Final() {
-	fmt.Fprintf(OUTPUT_HANDLE, "%s:", p.status.String())
+	fmt.Fprintf(pOutputHandle, "%s:", p.status.String())
 	if len(p.messages) > 0 {
-		fmt.Fprintf(OUTPUT_HANDLE, " ")
-		fmt.Fprintf(OUTPUT_HANDLE, strings.Join(p.messages, p.MessageSeparator))
+		fmt.Fprintf(pOutputHandle, " ")
+		fmt.Fprintf(pOutputHandle, strings.Join(p.messages, p.MessageSeparator))
 	}
 	if len(p.metrics) > 0 {
 		var sorted []string
 		sorted = make([]string, 0, len(p.metrics))
 
-		fmt.Fprintf(OUTPUT_HANDLE, " |")
+		fmt.Fprintf(pOutputHandle, " |")
 		for k := range p.metrics {
 			sorted = append(sorted, k)
 		}
 		sort.Strings(sorted)
 		for _, k := range sorted {
-			fmt.Fprintf(OUTPUT_HANDLE, " %s=%v%s;%s;%s;;",
+			fmt.Fprintf(pOutputHandle, " %s=%v%s;%s;%s;;",
 				k,
 				p.metrics[k].value,
 				p.metrics[k].uom,
@@ -203,8 +203,8 @@ func (p *Plugin) Final() {
 			)
 		}
 	}
-	fmt.Fprintf(OUTPUT_HANDLE, "\n")
-	OS_EXIT(p.status)
+	fmt.Fprintf(pOutputHandle, "\n")
+	pOsExit(p.status)
 }
 
 func (p *Plugin) SetMessage(format string, args ...interface{}) {
@@ -249,22 +249,22 @@ func (p *Plugin) ParseArgs(opts interface{}) error {
 		g.ShortDescription = "Plugin Options"
 	}
 
-	_, err = parser.ParseArgs(ARGS)
+	_, err = parser.ParseArgs(pArgs)
 
 	if builtin.Help {
-		fmt.Fprintf(OUTPUT_HANDLE, "%s v%s\n", p.name, strings.TrimPrefix(p.Version, "v"))
+		fmt.Fprintf(pOutputHandle, "%s v%s\n", p.name, strings.TrimPrefix(p.Version, "v"))
 		if len(p.Preamble) > 0 {
-			fmt.Fprintln(OUTPUT_HANDLE, p.Preamble)
+			fmt.Fprintln(pOutputHandle, p.Preamble)
 		}
 		parser.Options = flags.HelpFlag
 		var b bytes.Buffer
 		parser.WriteHelp(&b)
-		fmt.Fprintln(OUTPUT_HANDLE, b.String())
+		fmt.Fprintln(pOutputHandle, b.String())
 
 		if len(p.Description) > 0 {
-			fmt.Fprintln(OUTPUT_HANDLE, p.Description)
+			fmt.Fprintln(pOutputHandle, p.Description)
 		}
-		OS_EXIT(UNKNOWN)
+		pOsExit(UNKNOWN)
 	}
 
 	return err

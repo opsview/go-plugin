@@ -53,12 +53,12 @@ type FormatArgs struct {
 }
 
 type AddMessageOutputTest struct {
-	name              string
-	version           string
-	messages          []FormatArgs
-	separator         string
-	expected_exitcode Status
-	expected_output   string
+	name             string
+	version          string
+	messages         []FormatArgs
+	separator        string
+	expectedExitCode Status
+	expectedOutput   string
 }
 
 func TestAddMessage(t *testing.T) {
@@ -142,30 +142,30 @@ func TestAddMessage(t *testing.T) {
 		}
 		check.Final()
 
-		got_output := exitHandler.output.String()
-		if got_output != test.expected_output {
-			t.Errorf("Got output: '%s', expected: '%s'", got_output, test.expected_output)
+		gotOutput := exitHandler.output.String()
+		if gotOutput != test.expectedOutput {
+			t.Errorf("Got output: '%s', expected: '%s'", gotOutput, test.expectedOutput)
 		}
 
-		if exitHandler.code != test.expected_exitcode {
-			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expected_exitcode)
+		if exitHandler.code != test.expectedExitCode {
+			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expectedExitCode)
 		}
 	}
 }
 
 type ResultFormatArgs struct {
-	result     Status
-	new_status Status
-	format     string
-	params     []interface{}
+	result    Status
+	newStatus Status
+	format    string
+	params    []interface{}
 }
 
 type AddResultOutputTest struct {
-	name              string
-	version           string
-	results           []ResultFormatArgs
-	expected_exitcode Status
-	expected_output   string
+	name             string
+	version          string
+	results          []ResultFormatArgs
+	expectedExitCode Status
+	expectedOutput   string
 }
 
 func TestAddResult(t *testing.T) {
@@ -216,30 +216,30 @@ func TestAddResult(t *testing.T) {
 		check := New(test.name, test.version)
 		for _, r := range test.results {
 			check.AddResult(r.result, r.format, r.params...)
-			if r.new_status != check.Status() {
-				t.Errorf("Got updated status: '%s', expected: '%s'", check.Status(), r.new_status)
+			if r.newStatus != check.Status() {
+				t.Errorf("Got updated status: '%s', expected: '%s'", check.Status(), r.newStatus)
 			}
 		}
 		check.Final()
 
-		got_output := exitHandler.output.String()
-		if got_output != test.expected_output {
-			t.Errorf("Got output: '%s', expected: '%s'", got_output, test.expected_output)
+		gotOutput := exitHandler.output.String()
+		if gotOutput != test.expectedOutput {
+			t.Errorf("Got output: '%s', expected: '%s'", gotOutput, test.expectedOutput)
 		}
 
-		if exitHandler.code != test.expected_exitcode {
-			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expected_exitcode)
+		if exitHandler.code != test.expectedExitCode {
+			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expectedExitCode)
 		}
 	}
 }
 
 type ExitHelpersTest struct {
-	name              string
-	version           string
-	method            func(*Plugin, string, ...interface{})
-	message           FormatArgs
-	expected_exitcode Status
-	expected_output   string
+	name             string
+	version          string
+	method           func(*Plugin, string, ...interface{})
+	message          FormatArgs
+	expectedExitCode Status
+	expectedOutput   string
 }
 
 func TestExitHelpers(t *testing.T) {
@@ -276,31 +276,31 @@ func TestExitHelpers(t *testing.T) {
 		check := New(test.name, test.version)
 		test.method(check, test.message.format, test.message.params...)
 
-		got_output := exitHandler.output.String()
-		if got_output != test.expected_output {
-			t.Errorf("Got output: '%s', expected: '%s'", got_output, test.expected_output)
+		gotOutput := exitHandler.output.String()
+		if gotOutput != test.expectedOutput {
+			t.Errorf("Got output: '%s', expected: '%s'", gotOutput, test.expectedOutput)
 		}
 
-		if exitHandler.code != test.expected_exitcode {
-			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expected_exitcode)
+		if exitHandler.code != test.expectedExitCode {
+			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expectedExitCode)
 		}
 	}
 }
 
 type MetricArgs struct {
-	name               string
-	value              interface{}
-	uom_and_thresholds []string
-	err                string
+	name             string
+	value            interface{}
+	uomAndThresholds []string
+	err              string
 }
 
 type AddMetricOutputTest struct {
-	name              string
-	version           string
-	metrics           []MetricArgs
-	include_all       bool
-	expected_exitcode Status
-	expected_output   string
+	name             string
+	version          string
+	metrics          []MetricArgs
+	includeAll       bool
+	expectedExitCode Status
+	expectedOutput   string
 }
 
 func TestAddMetric(t *testing.T) {
@@ -473,24 +473,24 @@ func TestAddMetric(t *testing.T) {
 		exitHandler := initExitHandler()
 
 		check := New(test.name, test.version)
-		if test.include_all {
+		if test.includeAll {
 			check.AllMetricsInOutput = true
 		}
 		for _, m := range test.metrics {
-			metric_err := check.AddMetric(m.name, m.value, m.uom_and_thresholds...)
-			if m.err != "" && metric_err.Error() != m.err {
-				t.Errorf("Got error: '%s', expected: '%s'", metric_err, m.err)
+			metricErr := check.AddMetric(m.name, m.value, m.uomAndThresholds...)
+			if m.err != "" && metricErr.Error() != m.err {
+				t.Errorf("Got error: '%s', expected: '%s'", metricErr, m.err)
 			}
 		}
 		check.Final()
 
-		got_output := exitHandler.output.String()
-		if got_output != test.expected_output {
-			t.Errorf("Got output: '%s', expected: '%s'", got_output, test.expected_output)
+		gotOutput := exitHandler.output.String()
+		if gotOutput != test.expectedOutput {
+			t.Errorf("Got output: '%s', expected: '%s'", gotOutput, test.expectedOutput)
 		}
 
-		if exitHandler.code != test.expected_exitcode {
-			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expected_exitcode)
+		if exitHandler.code != test.expectedExitCode {
+			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expectedExitCode)
 		}
 	}
 }
@@ -500,14 +500,14 @@ var OptionParseTest struct {
 }
 
 type ParseArgsTest struct {
-	name              string
-	version           string
-	args              []string
-	preamble          string
-	description       string
-	expected_hostname string
-	expected_exitcode Status
-	expected_output   string
+	name             string
+	version          string
+	args             []string
+	preamble         string
+	description      string
+	expectedHostname string
+	expectedExitCode Status
+	expectedOutput   string
 }
 
 func TestParseArgs(t *testing.T) {
@@ -556,8 +556,6 @@ Description:
 	for _, test := range tests {
 		exitHandler := initExitHandler(test.args)
 
-		//OUTPUT_HANDLE = os.Stdout
-
 		check := New(test.name, test.version)
 		if len(test.preamble) > 0 {
 			check.Preamble = test.preamble
@@ -567,27 +565,27 @@ Description:
 		}
 		check.ParseArgs(&OptionParseTest)
 
-		if OptionParseTest.Hostname != test.expected_hostname {
-			t.Errorf("Got hostname: '%s', expected: '%s'", OptionParseTest.Hostname, test.expected_hostname)
+		if OptionParseTest.Hostname != test.expectedHostname {
+			t.Errorf("Got hostname: '%s', expected: '%s'", OptionParseTest.Hostname, test.expectedHostname)
 		}
 
-		got_output := exitHandler.output.String()
-		if got_output != test.expected_output {
-			t.Errorf("Got output: '%s', expected: '%s'", got_output, test.expected_output)
+		gotOutput := exitHandler.output.String()
+		if gotOutput != test.expectedOutput {
+			t.Errorf("Got output: '%s', expected: '%s'", gotOutput, test.expectedOutput)
 		}
 
-		if exitHandler.code != test.expected_exitcode {
-			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expected_exitcode)
+		if exitHandler.code != test.expectedExitCode {
+			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expectedExitCode)
 		}
 	}
 }
 
 func initExitHandler(args ...[]string) (exitHandler *ExitHandler) {
 	exitHandler = &ExitHandler{}
-	OS_EXIT = func(code Status) { exitHandler.code = code }
-	OUTPUT_HANDLE = exitHandler
+	pOsExit = func(code Status) { exitHandler.code = code }
+	pOutputHandle = exitHandler
 	if len(args) > 0 {
-		ARGS = args[0]
+		pArgs = args[0]
 	}
 
 	return

@@ -18,7 +18,7 @@ func TestExitCode(t *testing.T) {
 	for _, test := range tests {
 		out := test.in.ExitCode()
 		if test.code != out {
-			t.Errorf("Got %s, expected %s", out, test.code)
+			t.Errorf("Got %d, expected %d", out, test.code)
 		}
 	}
 }
