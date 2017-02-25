@@ -2,6 +2,7 @@ package plugin
 
 type Status int
 
+// Supported exit statuses
 const (
 	OK Status = iota
 	WARNING
@@ -9,10 +10,12 @@ const (
 	UNKNOWN
 )
 
+// ExitCode returns current status as integer
 func (st Status) ExitCode() int {
 	return int(st)
 }
 
+// String returns current status as string
 func (st Status) String() string {
 	switch st {
 	case 0:

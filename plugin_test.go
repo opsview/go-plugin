@@ -133,14 +133,16 @@ func TestAddMessage(t *testing.T) {
 	for _, test := range tests {
 		exitHandler := initExitHandler()
 
-		check := New(test.name, test.version)
-		for _, m := range test.messages {
-			check.AddMessage(m.format, m.params...)
-		}
-		if len(test.separator) > 0 {
-			check.MessageSeparator = test.separator
-		}
-		check.Final()
+		func() {
+			check := New(test.name, test.version)
+			defer check.Final()
+			for _, m := range test.messages {
+				check.AddMessage(m.format, m.params...)
+			}
+			if len(test.separator) > 0 {
+				check.MessageSeparator = test.separator
+			}
+		}()
 
 		gotOutput := exitHandler.output.String()
 		if gotOutput != test.expectedOutput {
@@ -472,17 +474,81 @@ func TestAddMetric(t *testing.T) {
 	for _, test := range tests {
 		exitHandler := initExitHandler()
 
-		check := New(test.name, test.version)
-		if test.includeAll {
-			check.AllMetricsInOutput = true
-		}
-		for _, m := range test.metrics {
-			metricErr := check.AddMetric(m.name, m.value, m.uomAndThresholds...)
-			if m.err != "" && metricErr.Error() != m.err {
-				t.Errorf("Got error: '%s', expected: '%s'", metricErr, m.err)
+		func() {
+			check := New(test.name, test.version)
+			defer check.Final()
+			if test.includeAll {
+				check.AllMetricsInOutput = true
 			}
+			for _, m := range test.metrics {
+				metricErr := check.AddMetric(m.name, m.value, m.uomAndThresholds...)
+				if m.err != "" && metricErr.Error() != m.err {
+					t.Errorf("Got error: '%s', expected: '%s'", metricErr, m.err)
+				}
+			}
+		}()
+
+		gotOutput := exitHandler.output.String()
+		if gotOutput != test.expectedOutput {
+			t.Errorf("Got output: '%s', expected: '%s'", gotOutput, test.expectedOutput)
 		}
-		check.Final()
+
+		if exitHandler.code != test.expectedExitCode {
+			t.Errorf("Got code: %d, expected: %d", exitHandler.code, test.expectedExitCode)
+		}
+	}
+}
+
+type FinalOutputTest struct {
+	name             string
+	version          string
+	metrics          []MetricArgs
+	throwException   bool
+	expectedExitCode Status
+	expectedOutput   string
+}
+
+func TestFinal(t *testing.T) {
+	tests := []FinalOutputTest{
+		{
+			"check_plugin", "1.0",
+			nil, false,
+			OK, "OK:\n",
+		},
+		{
+			"check_plugin", "1.0",
+			[]MetricArgs{
+				{"m1", 123.456, nil, ""},
+			},
+			false,
+			OK, "OK: | m1=123.456;;;;\n",
+		},
+		{
+			"check_plugin", "1.0",
+			[]MetricArgs{
+				{"m1", 123.456, nil, ""},
+			},
+			true,
+			CRITICAL, "CRITICAL: check_plugin panic: Forced exception\n",
+		},
+	}
+
+	for _, test := range tests {
+		exitHandler := initExitHandler()
+
+		func() {
+			check := New(test.name, test.version)
+			defer check.Final()
+			for _, m := range test.metrics {
+				metricErr := check.AddMetric(m.name, m.value, m.uomAndThresholds...)
+				if m.err != "" && metricErr.Error() != m.err {
+					t.Errorf("Got error: '%s', expected: '%s'", metricErr, m.err)
+				}
+			}
+			if test.throwException {
+				panic("Forced exception")
+			}
+		}()
 
 		gotOutput := exitHandler.output.String()
 		if gotOutput != test.expectedOutput {
