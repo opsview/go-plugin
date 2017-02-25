@@ -27,6 +27,9 @@ go-plugin is a library for creating monitoring plugins
 
     func main() {
       check := plugin.New("check_service", "1.0.0")
+      if err := check.ParseArgs(&opts); err != nil {
+        check.ExitCritical("Error parsing arguments: %s", err)
+      }
       defer check.Final()
 
       check.AddMessage("Service %s:%d", opts.Hostname, opts.Port)
