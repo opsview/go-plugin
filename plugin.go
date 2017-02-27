@@ -27,7 +27,7 @@ Example usage:
 
     func main() {
       // initialize check
-      check := plugin.New("check_service", "1.0.0")
+      check := plugin.New("check_service", "v1.0.0")
 
       // parse command line arguments
       if err := check.ParseArgs(&opts); err != nil {

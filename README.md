@@ -26,7 +26,7 @@ Package plugin provides a Go library which helps writing monitoring plugins.
     }
 
     func main() {
-      check := plugin.New("check_service", "1.0.0")
+      check := plugin.New("check_service", "v1.0.0")
       if err := check.ParseArgs(&opts); err != nil {
         check.ExitCritical("Error parsing arguments: %s", err)
       }
