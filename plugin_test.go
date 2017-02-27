@@ -64,26 +64,26 @@ type AddMessageOutputTest struct {
 func TestAddMessage(t *testing.T) {
 	tests := []AddMessageOutputTest{
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			nil, "",
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All ok", nil},
 			}, "",
 			OK, "OK: All ok\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All ok", nil},
 			}, "=",
 			OK, "OK: All ok\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All ok", nil},
 				{"Nothing to see", nil},
@@ -91,7 +91,7 @@ func TestAddMessage(t *testing.T) {
 			OK, "OK: All ok, Nothing to see\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All ok", nil},
 				{"Nothing to see", nil},
@@ -99,21 +99,21 @@ func TestAddMessage(t *testing.T) {
 			OK, "OK: All ok:Nothing to see\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All %s => %d", []interface{}{"ok", 123}},
 			}, "",
 			OK, "OK: All ok => 123\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All %s => %d", []interface{}{"ok", 123}},
 			}, "=",
 			OK, "OK: All ok => 123\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All %s => %d", []interface{}{"ok", 123}},
 				{"Nothing to %s => %d", []interface{}{"see", 456}},
@@ -121,7 +121,7 @@ func TestAddMessage(t *testing.T) {
 			OK, "OK: All ok => 123, Nothing to see => 456\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]FormatArgs{
 				{"All %s => %d", []interface{}{"ok", 123}},
 				{"Nothing to %s => %d", []interface{}{"see", 456}},
@@ -173,19 +173,19 @@ type AddResultOutputTest struct {
 func TestAddResult(t *testing.T) {
 	tests := []AddResultOutputTest{
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			nil,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]ResultFormatArgs{
 				{OK, OK, "All ok", nil},
 			},
 			OK, "OK: All ok\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]ResultFormatArgs{
 				{OK, OK, "All ok", nil},
 				{OK, OK, "Still ok", nil},
@@ -193,7 +193,7 @@ func TestAddResult(t *testing.T) {
 			OK, "OK: All ok, Still ok\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]ResultFormatArgs{
 				{OK, OK, "All ok", nil},
 				{WARNING, WARNING, "Warning! fault detected", nil},
@@ -202,7 +202,7 @@ func TestAddResult(t *testing.T) {
 			WARNING, "WARNING: All ok, Warning! fault detected, Still ok?\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]ResultFormatArgs{
 				{OK, OK, "All ok", nil},
 				{OK, OK, "Still ok...", nil},
@@ -247,25 +247,25 @@ type ExitHelpersTest struct {
 func TestExitHelpers(t *testing.T) {
 	tests := []ExitHelpersTest{
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			(*Plugin).ExitOK,
 			FormatArgs{"with exit code: %d", []interface{}{0}},
 			OK, "OK: with exit code: 0\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			(*Plugin).ExitWarning,
 			FormatArgs{"with exit code: %d", []interface{}{1}},
 			WARNING, "WARNING: with exit code: 1\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			(*Plugin).ExitCritical,
 			FormatArgs{"with exit code: %d", []interface{}{2}},
 			CRITICAL, "CRITICAL: with exit code: 2\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			(*Plugin).ExitUnknown,
 			FormatArgs{"with exit code: %d", []interface{}{3}},
 			3, "UNKNOWN: with exit code: 3\n",
@@ -308,33 +308,33 @@ type AddMetricOutputTest struct {
 func TestAddMetric(t *testing.T) {
 	tests := []AddMetricOutputTest{
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			nil, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, nil, ""},
 			}, false,
 			OK, "OK: | m1=123.456;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"white space", 123.456, nil, ""},
 			}, false,
 			OK, "OK: | 'white space'=123.456;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", "abc", nil, "Invalid value of m1: abc"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, nil, ""},
 				{"m2", 456.789, nil, ""},
@@ -342,7 +342,7 @@ func TestAddMetric(t *testing.T) {
 			OK, "OK: | m1=123.456;;;; m2=456.789;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, nil, ""},
 				{"m2", 456.789, nil, ""},
@@ -351,119 +351,119 @@ func TestAddMetric(t *testing.T) {
 			OK, "OK: | m1=123.456;;;; m2=456.789;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"MB"}, ""},
 			}, true,
 			OK, "OK: m1 is 123.456MB | m1=123.456MB;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"MB", ""}, ""},
 			}, true,
 			OK, "OK: m1 is 123.456MB | m1=123.456MB;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"MB", "1", "2", "3"}, "Too many arguments"},
 			}, true,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "100"}, ""},
 			}, false,
 			WARNING, "WARNING: m1 is 123.456 (outside 100) | m1=123.456;100;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "c"}, "Invalid format of warning threshold m1: c"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"TB", "100", "123"}, ""},
 			}, false,
 			CRITICAL, "CRITICAL: m1 is 123.456TB (outside 123) | m1=123.456TB;100;123;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "0:100"}, ""},
 			}, false,
 			WARNING, "WARNING: m1 is 123.456 (outside 0:100) | m1=123.456;0:100;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "2000:100"}, "Invalid format of warning threshold m1: 2000:100"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "20:100:200"}, "Invalid format of warning threshold m1: 20:100:200"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "200:"}, ""},
 			}, false,
 			WARNING, "WARNING: m1 is 123.456 (outside 200:) | m1=123.456;200:;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "f:"}, "Invalid format of warning threshold m1: f:"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "100:g"}, "Invalid format of warning threshold m1: 100:g"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"", "b:100"}, "Invalid format of warning threshold m1: b:100"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"TB", "80:100", "~:123"}, ""},
 			}, false,
 			CRITICAL, "CRITICAL: m1 is 123.456TB (outside ~:123) | m1=123.456TB;80:100;~:123;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"TB", "80:100", "~:d"}, "Invalid format of critical threshold m1: ~:d"},
 			}, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"TB", "100", "@123"}, ""},
 			}, false,
 			WARNING, "WARNING: m1 is 123.456TB (outside 100) | m1=123.456TB;100;@123;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, []string{"TB", "100", "@200"}, ""},
 			}, false,
@@ -511,12 +511,12 @@ type FinalOutputTest struct {
 func TestFinal(t *testing.T) {
 	tests := []FinalOutputTest{
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			nil, false,
 			OK, "OK:\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, nil, ""},
 			},
@@ -524,7 +524,7 @@ func TestFinal(t *testing.T) {
 			OK, "OK: | m1=123.456;;;;\n",
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]MetricArgs{
 				{"m1", 123.456, nil, ""},
 			},
@@ -579,7 +579,7 @@ type ParseArgsTest struct {
 func TestParseArgs(t *testing.T) {
 	tests := []ParseArgsTest{
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]string{"-H", "localhost", "-h"},
 			"",
 			"",
@@ -597,7 +597,7 @@ Default Options:
 `,
 		},
 		{
-			"check_plugin", "1.0",
+			"check_plugin", "v1.0",
 			[]string{"-H", "localhost", "-h"},
 			"Test output",
 			"Description:\n123",

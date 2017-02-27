@@ -3,16 +3,14 @@
 [![GoDoc](https://godoc.org/github.com/ajgb/go-plugin?status.png)][godoc]
 [![Build Status](https://travis-ci.org/ajgb/go-plugin.svg?branch=master)][travis]
 [![Codecov Status](https://codecov.io/gh/ajgb/go-plugin/branch/master/graph/badge.svg)][codecov]
-[![GPLv3](https://img.shields.io/badge/licence-GPLv3-green.svg)][license]
 
 [travis]: https://travis-ci.org/ajgb/go-plugin
-[license]: https://github.com/ajgb/go-plugin/blob/master/LICENSE
 [godoc]: https://godoc.org/github.com/ajgb/go-plugin
 [codecov]: https://codecov.io/gh/ajgb/go-plugin
 
 ## Description
 
-go-plugin is a library for creating monitoring plugins
+Package plugin provides a Go library which helps writing monitoring plugins.
 
 ## Synopsis
 
@@ -45,6 +43,10 @@ go-plugin is a library for creating monitoring plugins
         check.AddMetric(metric, value)
       }
     }
+
+## API Documentation
+
+Please read full usage documentation at <https://godoc.org/github.com/ajgb/go-plugin>
 
 ## License
 
