@@ -53,7 +53,6 @@ Example usage:
     }
 
 */
-
 package plugin
 
 import (
@@ -123,7 +122,7 @@ AddMetric adds new metric to check's performance data, with name and value
 parameters required. The optional string arguments include (in order):
 uom (unit of measurement), warning threshold, critical threshold - for
 details see Monitoring Plugins Development Guidelines.
-Note: Metrics name have to be unique.
+Note: Metrics names have to be unique.
 
     // basic usage - add metric with value
     check.AddMetric("load5", 0.98)
