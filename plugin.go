@@ -69,10 +69,11 @@ import (
 // Plugin represents the check - its name, version and help messages. It also
 // stores the check status, messages and metrics data.
 type Plugin struct {
-	name     string
 	status   Status
 	messages []string
 	metrics  checkMetrics
+	// Plugin name
+	Name string
 	// Plugin version
 	Version string
 	// Preamble displayed in help output before flags usage
@@ -107,10 +108,10 @@ New creates a new plugin instance.
 */
 func New(name, version string) *Plugin {
 	return &Plugin{
-		name:               name,
 		status:             OK,
 		messages:           make([]string, 0),
 		metrics:            make(checkMetrics),
+		Name:               name,
 		Version:            version,
 		AllMetricsInOutput: false,
 		MessageSeparator:   ", ",
@@ -295,7 +296,7 @@ Final calculates the final check output and exit status.
 */
 func (p *Plugin) Final() {
 	if r := recover(); r != nil {
-		p.ExitCritical("%s panic: %v", p.name, r)
+		p.ExitCritical("%s panic: %v", p.Name, r)
 		return // for testing only as it overrides the os.Exit
 	}
 	fmt.Fprintf(pOutputHandle, "%s:", p.status.String())
@@ -402,7 +403,7 @@ func (p *Plugin) ParseArgs(opts interface{}) error {
 	_, err = parser.ParseArgs(pArgs)
 
 	if builtin.Help {
-		fmt.Fprintf(pOutputHandle, "%s v%s\n", p.name, strings.TrimPrefix(p.Version, "v"))
+		fmt.Fprintf(pOutputHandle, "%s v%s\n", p.Name, strings.TrimPrefix(p.Version, "v"))
 		if len(p.Preamble) > 0 {
 			fmt.Fprintln(pOutputHandle, p.Preamble)
 		}
