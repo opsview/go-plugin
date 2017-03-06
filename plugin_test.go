@@ -85,6 +85,13 @@ func TestAddMessage(t *testing.T) {
 		{
 			"check_plugin", "v1.0",
 			[]FormatArgs{
+				{"% All ok %", nil},
+			}, "=",
+			OK, "OK: % All ok %\n",
+		},
+		{
+			"check_plugin", "v1.0",
+			[]FormatArgs{
 				{"All ok", nil},
 				{"Nothing to see", nil},
 			}, "",
@@ -187,6 +194,13 @@ func TestAddResult(t *testing.T) {
 		{
 			"check_plugin", "v1.0",
 			[]ResultFormatArgs{
+				{OK, OK, "% All ok %", nil},
+			},
+			OK, "OK: % All ok %\n",
+		},
+		{
+			"check_plugin", "v1.0",
+			[]ResultFormatArgs{
 				{OK, OK, "All ok", nil},
 				{OK, OK, "Still ok", nil},
 			},
@@ -246,6 +260,12 @@ type ExitHelpersTest struct {
 
 func TestExitHelpers(t *testing.T) {
 	tests := []ExitHelpersTest{
+		{
+			"check_plugin", "v1.0",
+			(*Plugin).ExitOK,
+			FormatArgs{"with percent: %", nil},
+			OK, "OK: with percent: %\n",
+		},
 		{
 			"check_plugin", "v1.0",
 			(*Plugin).ExitOK,
@@ -356,6 +376,13 @@ func TestAddMetric(t *testing.T) {
 				{"m1", 123.456, []string{"MB"}, ""},
 			}, true,
 			OK, "OK: m1 is 123.456MB | m1=123.456MB;;;;\n",
+		},
+		{
+			"check_plugin", "v1.0",
+			[]MetricArgs{
+				{"percent", 23.45, []string{"%"}, ""},
+			}, true,
+			OK, "OK: percent is 23.45% | percent=23.45%;;;;\n",
 		},
 		{
 			"check_plugin", "v1.0",

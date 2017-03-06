@@ -264,7 +264,12 @@ AddMessage appends message to check output.
 
 */
 func (p *Plugin) AddMessage(format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
+	var msg string
+	if len(args) > 0 {
+		msg = fmt.Sprintf(format, args...)
+	} else {
+		msg = fmt.Sprint(format)
+	}
 	p.messages = append(p.messages, msg)
 }
 
@@ -302,7 +307,7 @@ func (p *Plugin) Final() {
 	fmt.Fprintf(pOutputHandle, "%s:", p.status.String())
 	if len(p.messages) > 0 {
 		fmt.Fprintf(pOutputHandle, " ")
-		fmt.Fprintf(pOutputHandle, strings.Join(p.messages, p.MessageSeparator))
+		fmt.Fprint(pOutputHandle, strings.Join(p.messages, p.MessageSeparator))
 	}
 	if len(p.metrics) > 0 {
 		var sorted []string
@@ -334,9 +339,8 @@ SetMessage replaces accumulated messages with new one provided.
 
 */
 func (p *Plugin) SetMessage(format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
-
-	p.messages = []string{msg}
+	p.messages = []string{}
+	p.AddMessage(format, args...)
 }
 
 func (p *Plugin) exit(code Status, format string, args ...interface{}) {
